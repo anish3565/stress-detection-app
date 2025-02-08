@@ -1,12 +1,15 @@
-import streamlit as st
+import streamlit as st  
 
-# Configure the app (Move this to the top)
 st.set_page_config(
     page_title='Stress Level Detector',
-    page_icon='heavy_exclamation_mark',
+    page_icon='⚠️',
     layout='wide',
     initial_sidebar_state='auto'
 )
+
+# Chatbot import
+from chatbot import chatbot_ui
+chatbot_ui()
 
 # Import necessary functions and modules
 from web_functions import load_data
