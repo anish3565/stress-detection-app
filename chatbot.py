@@ -1,76 +1,135 @@
 import streamlit as st
+import requests
+import json
 
-def chatbot_ui():
-    # Initialize session state variables if they do not exist
-    if "chat_open" not in st.session_state:
-        st.session_state.chat_open = False
+class OllamaAPI:
+    def __init__(self, base_url: str = "http://127.0.0.1:11434"):
+        self.base_url = base_url
+
+    def generate_response(self, prompt: str, model: str = "mistral:7b"):
+        try:
+            response = requests.post(
+                f"{self.base_url}/api/generate",
+                json={
+                    "model": model,
+                    "prompt": prompt,
+                    "stream": True
+                },
+                stream=True
+            )
+            response.raise_for_status()
+            
+            for line in response.iter_lines():
+                if line:
+                    json_response = json.loads(line)
+                    if chunk := json_response.get('response', ''):
+                        yield chunk
+                        
+        except Exception as e:
+            yield f"Error: {str(e)}"
+
+def initialize_chat():
     if "messages" not in st.session_state:
         st.session_state.messages = []
+    if "ollama_api" not in st.session_state:
+        st.session_state.ollama_api = OllamaAPI()
+    if "chat_visible" not in st.session_state:
+        st.session_state.chat_visible = False
 
-    # Chatbot toggle button
-    if st.button("💬 Chat with AI"):
-        st.session_state.chat_open = not st.session_state.chat_open  # Toggle chat window
+def chatbot_ui():
+    # Add custom CSS for the chat interface
+    st.markdown("""
+        <style>
+        .floating-chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            z-index: 1000;
+        }
+        .chat-header {
+            background-color: #2D2D2D;
+            color: white;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+        }
+        .chat-body {
+            background-color: white;
+            border-radius: 0 0 10px 10px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            border-radius: 15px;
+            padding: 10px 15px;
+            margin: 5px 20% 5px 0;
+            color: black;
+        }
+        .bot-message {
+            background-color: #f5f5f5;
+            border-radius: 15px;
+            padding: 10px 15px;
+            margin: 5px 0 5px 20%;
+            color: black;
+        }
+        .chat-input {
+            padding: 10px;
+            background-color: white;
+            border-top: 1px solid #ddd;
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
-    # Chatbot UI
-    if st.session_state.chat_open:
-        with st.container():
-            st.markdown(
-                """
-                <style>
-                .chat-container {
-                    position: fixed;
-                    bottom: 20px;
-                    right: 20px;
-                    width: 350px;
-                    background-color: white;
-                    padding: 10px;
-                    border-radius: 10px;
-                    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-                }
-                .chat-messages {
-                    max-height: 250px;
-                    overflow-y: auto;
-                    padding: 5px;
-                    border-bottom: 1px solid #ddd;
-                }
-                .chat-input {
-                    width: 100%;
-                    padding: 5px;
-                }
-                </style>
-                <div class="chat-container">
-                    <div class="chat-messages">
-                """,
-                unsafe_allow_html=True,
-            )
+    initialize_chat()
 
-            # Display previous chat messages
-            for msg in st.session_state.messages:
-                st.markdown(f"**{msg['role']}:** {msg['content']}")
+    # Create a container for the floating chat
+    chat_container = st.container()
 
-            st.markdown("</div>", unsafe_allow_html=True)
+    # Chat toggle button
+    if st.button("💬 Chat Support", key="chat_toggle"):
+        st.session_state.chat_visible = not st.session_state.chat_visible
 
-            # User input for chatbot
-            user_input = st.text_input("Type your message here...", key="chat_input")
+    if st.session_state.chat_visible:
+        with chat_container:
+            st.markdown('<div class="floating-chat-container">', unsafe_allow_html=True)
+            
+            # Chat header
+            st.markdown('<div class="chat-header">Chat Support</div>', unsafe_allow_html=True)
+            
+            # Chat messages
+            st.markdown('<div class="chat-body">', unsafe_allow_html=True)
+            for message in st.session_state.messages:
+                message_class = "user-message" if message["role"] == "user" else "bot-message"
+                st.markdown(
+                    f'<div class="{message_class}">{message["content"]}</div>',
+                    unsafe_allow_html=True
+                )
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            # Chat input
+            with st.markdown('<div class="chat-input">', unsafe_allow_html=True):
+                user_input = st.text_input("Type your message...", key="user_input")
 
-            # Process input when the user clicks "Send"
-            if st.button("Send") and user_input:
-                st.session_state.messages.append({"role": "You", "content": user_input})
+                if user_input:
+                    # Add user message
+                    st.session_state.messages.append({"role": "user", "content": user_input})
+                    
+                    # Get bot response
+                    full_response = ""
+                    for chunk in st.session_state.ollama_api.generate_response(user_input):
+                        full_response += chunk
+                    
+                    # Add bot response
+                    st.session_state.messages.append({"role": "assistant", "content": full_response})
+                    
+                    # Clear input properly
+                    del st.session_state["user_input"]
+                    st.rerun()
+            
+            st.markdown('</div>', unsafe_allow_html=True)
 
-                # Simulate bot response (Replace with API call)
-                bot_response = "I'm here to help! How are you feeling?"  # Replace this with actual API response
-                st.session_state.messages.append({"role": "Bot", "content": bot_response})
-
-                # Refresh UI
-                st.rerun()
-
-            # Close button
-            if st.button("Close Chat"):
-                st.session_state.chat_open = False
-                st.rerun()
-
-            st.markdown("</div>", unsafe_allow_html=True)
-
-# Ensure this script runs only when executed directly (not when imported)
 if __name__ == "__main__":
     chatbot_ui()

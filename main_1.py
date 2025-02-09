@@ -10,7 +10,8 @@ st.set_page_config(
 
 # Import necessary functions and modules
 from web_functions import load_data
-from Tabs import home, data, predict, visualise, chatbot
+from Tabs import home, data, predict, visualise
+from chatbot import chatbot_ui
 
 def main():
     # Dictionary for pages
@@ -18,8 +19,7 @@ def main():
         "Home": home,
         "Data Info": data,
         "Prediction": predict,
-        "Visualisation": visualise,
-        "Chatbot": chatbot.chatbot_page  # ✅ Direct function reference
+        "Visualisation": visualise
     }
 
     # Create a sidebar
@@ -39,10 +39,11 @@ def main():
             Tabs[page].app(df, X, y)
         elif page == "Data Info":
             Tabs[page].app(df)
-        elif page == "Chatbot":
-            Tabs[page]()  # ✅ Correct call for chatbot_page()
         else:
             Tabs[page].app()
+
+    # Add the chatbot UI (it will float over the main content)
+    chatbot_ui()
 
 if __name__ == "__main__":
     main()
