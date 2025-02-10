@@ -10,11 +10,7 @@ class OllamaAPI:
         try:
             response = requests.post(
                 f"{self.base_url}/api/generate",
-                json={
-                    "model": model,
-                    "prompt": prompt,
-                    "stream": True
-                },
+                json={"model": model, "prompt": prompt, "stream": True},
                 stream=True
             )
             response.raise_for_status()
@@ -24,7 +20,6 @@ class OllamaAPI:
                     json_response = json.loads(line)
                     if chunk := json_response.get('response', ''):
                         yield chunk
-                        
         except Exception as e:
             yield f"Error: {str(e)}"
 
@@ -33,103 +28,124 @@ def initialize_chat():
         st.session_state.messages = []
     if "ollama_api" not in st.session_state:
         st.session_state.ollama_api = OllamaAPI()
-    if "chat_visible" not in st.session_state:
-        st.session_state.chat_visible = False
 
 def chatbot_ui():
-    # Add custom CSS for the chat interface
     st.markdown("""
         <style>
+        /* Chat container */
         .floating-chat-container {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 400px;
-            z-index: 1000;
+            width: 350px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            # background: #f4f7fc;
+            font-family: Arial, sans-serif;
         }
+
+        /* Chat header */
         .chat-header {
-            background-color: #2D2D2D;
+            background: Gray;
             color: white;
             padding: 10px;
-            border-radius: 10px 10px 0 0;
-            cursor: pointer;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
         }
+
+        /* Chat body */
         .chat-body {
-            background-color: white;
-            border-radius: 0 0 10px 10px;
-            max-height: 500px;
+            max-height: 400px;
             overflow-y: auto;
-            padding: 15px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
         }
-        .user-message {
-            background-color: #e3f2fd;
-            border-radius: 15px;
+
+        /* Message container */
+        .message-container {
+            display: flex;
+            margin-bottom: 5px;
+        }
+
+        /* Messages */
+        .bot-message, .user-message {
             padding: 10px 15px;
-            margin: 5px 20% 5px 0;
-            color: black;
+            border-radius: 15px;
+            font-size: 14px;
+            max-width: 70%;
+            word-wrap: break-word;
         }
+
+        /* Bot messages (left side) */
         .bot-message {
-            background-color: #f5f5f5;
-            border-radius: 15px;
-            padding: 10px 15px;
-            margin: 5px 0 5px 20%;
+            background: #D1E8FF;
             color: black;
+            text-align: left;
+            align-self: flex-start;
         }
+
+        /* User messages (right side) */
+        .user-message {
+            background: #4A90E2;
+            color: white;
+            text-align: right;
+            align-self: flex-end;
+            margin-left: auto;  /* Pushes the user message to the right */
+        }
+
+        /* Input area */
         .chat-input {
             padding: 10px;
-            background-color: white;
+            background: white;
             border-top: 1px solid #ddd;
+            border-radius: 0 0 15px 15px;
+            text-align: center;
+        }
+
+        /* Input field */
+        .chat-input input {
+            width: 90%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
         }
         </style>
     """, unsafe_allow_html=True)
 
     initialize_chat()
 
-    # Create a container for the floating chat
-    chat_container = st.container()
+    with st.container():
+        st.markdown('<div class="floating-chat-container">', unsafe_allow_html=True)
+        st.markdown('<div class="chat-header">A safe space to talk!😄</div>', unsafe_allow_html=True)
+        st.markdown('<div class="chat-body">', unsafe_allow_html=True)
+        
+        for message in st.session_state.messages:
+            message_class = "user-message" if message["role"] == "user" else "bot-message"
+            alignment_class = "message-container user" if message["role"] == "user" else "message-container bot"
+            st.markdown(f'<div class="{alignment_class}"><div class="{message_class}">{message["content"]}</div></div>', unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    # Chat toggle button
-    if st.button("💬 Chat Support", key="chat_toggle"):
-        st.session_state.chat_visible = not st.session_state.chat_visible
+        with st.markdown('<div class="chat-input">', unsafe_allow_html=True):
+            user_input = st.text_input("How are you feeling today?", key="user_input")
 
-    if st.session_state.chat_visible:
-        with chat_container:
-            st.markdown('<div class="floating-chat-container">', unsafe_allow_html=True)
-            
-            # Chat header
-            st.markdown('<div class="chat-header">Chat Support</div>', unsafe_allow_html=True)
-            
-            # Chat messages
-            st.markdown('<div class="chat-body">', unsafe_allow_html=True)
-            for message in st.session_state.messages:
-                message_class = "user-message" if message["role"] == "user" else "bot-message"
-                st.markdown(
-                    f'<div class="{message_class}">{message["content"]}</div>',
-                    unsafe_allow_html=True
-                )
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            # Chat input
-            with st.markdown('<div class="chat-input">', unsafe_allow_html=True):
-                user_input = st.text_input("Type your message...", key="user_input")
-
-                if user_input:
-                    # Add user message
-                    st.session_state.messages.append({"role": "user", "content": user_input})
-                    
-                    # Get bot response
-                    full_response = ""
-                    for chunk in st.session_state.ollama_api.generate_response(user_input):
-                        full_response += chunk
-                    
-                    # Add bot response
-                    st.session_state.messages.append({"role": "assistant", "content": full_response})
-                    
-                    # Clear input properly
-                    del st.session_state["user_input"]
-                    st.rerun()
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+            if user_input:
+                st.session_state.messages.append({"role": "user", "content": user_input})
+                full_response = ""
+                for chunk in st.session_state.ollama_api.generate_response(user_input):
+                    full_response += chunk
+                
+                st.session_state.messages.append({"role": "assistant", "content": full_response})
+                del st.session_state["user_input"]
+                st.rerun()
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
     chatbot_ui()

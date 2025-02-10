@@ -1,8 +1,4 @@
-### Stress Level Detector
-
-![home](https://user-images.githubusercontent.com/64016811/199025266-69551658-cd50-40ec-a5d1-6ec5e26c5037.png)
-
-
+# Stress Level Detector
 
 ### Problem : 
 
@@ -45,9 +41,6 @@ Building an application that can detect the presence of a mental stress or the p
 ![image](https://user-images.githubusercontent.com/64016811/199024885-c3c519d2-b67d-40a7-9804-ea9c7ad938af.png)
 ![image](https://user-images.githubusercontent.com/64016811/199025007-87d895ee-f812-4987-9acd-e46a88d2055e.png)
 
-# How to run on the project on your local 
-
-
 
 ## Table of Contents
 
@@ -68,7 +61,7 @@ What things you need to install the software and how to install them.
 
 - Python (version 3.9)
 - seaborn
--streamlit
+- streamlit
 - numpy
 - matplotlib
 - pandas
@@ -79,7 +72,7 @@ What things you need to install the software and how to install them.
 1. **Clone the repository:**
 
     ```bash
-   https://github.com/anshumanbehera27/stress-level-detector.git
+   https://github.com/anish3565/stress-detection-app.git
     ```
 
 2. **Navigate to the project directory:**
@@ -107,7 +100,7 @@ What things you need to install the software and how to install them.
 
 5. **Run the code using this command;**
      ```bash
-    python -m streamlit run app.py 
+    python -m streamlit run main.py 
     ```
   
 
