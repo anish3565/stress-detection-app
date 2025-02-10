@@ -19,7 +19,7 @@ def main():
         "Data Info": data,
         "Prediction": predict,
         "Visualisation": visualise,
-        "Chatbot": chatbot.chatbot_page  # ✅ Direct function reference
+        "Chatbot": chatbot.chatbot_page
     }
 
     # Create a sidebar
@@ -34,13 +34,12 @@ def main():
     # Main content area
     main_container = st.container()
     with main_container:
-        # Call the app function of the selected page
         if page in ["Prediction", "Visualisation"]:
             Tabs[page].app(df, X, y)
         elif page == "Data Info":
             Tabs[page].app(df)
         elif page == "Chatbot":
-            Tabs[page]()  # ✅ Correct call for chatbot_page()
+            Tabs[page]()
         else:
             Tabs[page].app()
 

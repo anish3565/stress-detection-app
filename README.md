@@ -98,13 +98,6 @@ What things you need to install the software and how to install them.
 
    This command installs all the necessary libraries specified in `requirements.txt`.
 
-5. **Run the code using this command;**
-     ```bash
-    python -m streamlit run main.py 
-    ```
-  
+5. **Testing is done by hosting ollama and using it endpoint of '/api/generate' to generate response;**
 
-
-
-
-
+6. **Finally api is being used to generate response for final Stress-detection app;**

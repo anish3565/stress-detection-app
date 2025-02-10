@@ -11,10 +11,6 @@ import streamlit as st
 def load_data():
     """This function returns the preprocessed data"""
     df = pd.read_csv('SaYoPillow.csv')
-    # df.rename(columns={"bt": "t"}, inplace=True)
-    
-    # Perform feature and target split
-    # sr,rr,t,lm,bo,rem,sh,hr,sl
     X = df[["sr", "rr", "t", "lm", "bo", "rem", "sh", "hr"]]
     y = df['sl']
     return df, X, y
@@ -23,10 +19,6 @@ def load_data():
 @st.cache_resource
 def train_model(X, y):
     """This function trains the model and returns the model and model score"""
-    # model = DecisionTreeClassifier(
-    #     criterion='entropy', max_depth=4, random_state=42
-    # )
-
     model=RandomForestClassifier(n_estimators=100, random_state=42)
     model.fit(X, y)
     score = model.score(X, y)
