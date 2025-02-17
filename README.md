@@ -14,20 +14,31 @@ Building an application that can detect the presence of a mental stress or the p
 ### Layout
 
 ```
+├───__pycache__
+├───database
+│   └───chat_history.json
 ├───images
+│   └───home.png
+│   └───icon.jpg
 ├───Tabs
 │   └───__pycache__
-|   └─── home.py
+│   └───chatbot_1.py
+│   └───chatbot.py
+│   └───config.toml
 |   └─── data.py
+|   └─── home.py
 |   └─── predict.py
 |   └─── visualize.py
-|   └─── about.py
-└───__pycache__
-└─── readme.py
-└─── test_ollama.py
+├─── venv
+├─── .gitignore
+├─── chatbot_using_ollama.py
+├─── config.toml
 └─── main.py
-└─── web_functions.py
+└─── README.md
 └─── requirements.txt
+└─── SaYoPillow.csv
+└─── test_ollama.py
+└─── web_functions.py
 ```
 
 
