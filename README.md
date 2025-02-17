@@ -23,11 +23,11 @@ Building an application that can detect the presence of a mental stress or the p
 |   └─── visualize.py
 |   └─── about.py
 └───__pycache__
+└─── readme.py
+└─── test_ollama.py
 └─── main.py
 └─── web_functions.py
 └─── requirements.txt
-└─── Procfile
-└─── setup.sh
 ```
 
 
