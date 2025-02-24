@@ -19,7 +19,7 @@ def main():
         "Data Info": data,
         "Prediction": predict,
         "Visualisation": visualise,
-        "Chatbot": chatbot.chatbot_page
+        "Chatbot": chatbot
     }
 
     # Create a sidebar
@@ -39,9 +39,9 @@ def main():
         elif page == "Data Info":
             Tabs[page].app(df)
         elif page == "Chatbot":
-            Tabs[page]()
-        else:
-            Tabs[page].app()
+            Tabs[page].main()
+        # else:
+        #     Tabs[page].app()
 
 if __name__ == "__main__":
     main()

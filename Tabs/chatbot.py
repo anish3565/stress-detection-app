@@ -14,7 +14,7 @@ Context: {context}
 Answer:
 """
 
-pdfs_directory = 'pdfs/'
+pdfs_directory = 'Tabs\pdfs'
 
 embeddings = OllamaEmbeddings(model="deepseek-r1:1.5b")
 vector_store = InMemoryVectorStore(embeddings)
@@ -53,22 +53,28 @@ def answer_question(question, documents):
 
     return chain.invoke({"question": question, "context": context})
 
-uploaded_file = st.file_uploader(
-    "Upload PDF",
-    type="pdf",
-    accept_multiple_files=False
-)
+def main():
+    uploaded_file = st.file_uploader(
+        "Upload PDF",
+        type="pdf",
+        accept_multiple_files=False
+    )
 
-if uploaded_file:
-    upload_pdf(uploaded_file)
-    documents = load_pdf(pdfs_directory + uploaded_file.name)
-    chunked_documents = split_text(documents)
-    index_docs(chunked_documents)
+    if uploaded_file:
+        upload_pdf(uploaded_file)
+        documents = load_pdf(pdfs_directory + uploaded_file.name)
+        chunked_documents = split_text(documents)
+        index_docs(chunked_documents)
 
-    question = st.chat_input()
+        question = st.chat_input()
 
-    if question:
-        st.chat_message("user").write(question)
-        related_documents = retrieve_docs(question)
-        answer = answer_question(question, related_documents)
-        st.chat_message("assistant").write(answer)
+        if question:
+            st.chat_message("user").write(question)
+            related_documents = retrieve_docs(question)
+            answer = answer_question(question, related_documents)
+            st.chat_message("assistant").write(answer)
+
+# if __init__=="__main__":
+#     answer_question.
+
+# Deepseek model last trained in: July 2024
