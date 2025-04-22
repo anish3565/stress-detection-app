@@ -40,8 +40,8 @@ def main():
             Tabs[page].app(df)
         elif page == "Chatbot":
             Tabs[page].main()
-        # else:
-        #     Tabs[page].app()
+        else:
+            Tabs[page].app()
 
 if __name__ == "__main__":
     main()
